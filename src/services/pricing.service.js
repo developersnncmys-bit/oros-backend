@@ -62,12 +62,39 @@ export const calculateCartPricing =
 
             /*
              * Apply selected options
+             *
+             * "Filament" and "Color" are pseudo-options the storefront
+             * synthesizes from the global filament catalog — they don't live
+             * in ProductOption. Their priceDelta/priceMultiplier are already
+             * carried on the cart item, so we read them straight off instead
+             * of looking them up.
              */
+
+            const PSEUDO_OPTION_NAMES = new Set(["filament", "color"]);
 
             for (
                 const selectedOption
                 of cartItem.selectedOptions || []
             ) {
+
+                if (
+                    PSEUDO_OPTION_NAMES.has(
+                        (selectedOption.name || "").toLowerCase()
+                    )
+                ) {
+                    unitPrice +=
+                        Number(selectedOption.priceDelta) || 0;
+
+                    const multiplier =
+                        Number(selectedOption.priceMultiplier);
+
+                    unitPrice *=
+                        Number.isFinite(multiplier) && multiplier > 0
+                            ? multiplier
+                            : 1;
+
+                    continue;
+                }
 
                 const option =
                     await ProductOption.findOne({
