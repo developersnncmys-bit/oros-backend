@@ -2,7 +2,7 @@ import Quotation from "../models/quotation.model.js";
 import QuotationItem from "../models/quotationItem.model.js";
 import QuotationFile from "../models/quotationFile.model.js";
 import QuotationMessage from "../models/quotationMessage.model.js";
-import User from "../models/User.model.js";
+import User from "../models/user.model.js";
 import mongoose from "mongoose";
 import Notification from "../models/notification.model.js";
 import { ObjectPart$ } from "@aws-sdk/client-s3";

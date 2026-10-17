@@ -4,7 +4,7 @@ import ProductView from "../models/view.model.js";
 import Order from "../models/order.model.js";
 import OrderItem from "../models/orderItem.model.js";
 import Product from "../models/product.model.js";
-import User from "../models/User.model.js";
+import User from "../models/user.model.js";
 import Quotation from "../models/quotation.model.js";
 import Category from "../models/category.model.js";
 import ProductMedia from "../models/productMedia.model.js";

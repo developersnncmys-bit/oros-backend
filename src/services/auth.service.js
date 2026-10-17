@@ -1,4 +1,4 @@
-import User from "../models/User.model.js";
+import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import Otp from "../models/otp.model.js";
 import { generateJwtToken } from "../utils/jwt.js";

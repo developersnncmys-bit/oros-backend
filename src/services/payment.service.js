@@ -2,7 +2,7 @@ import Order from "../models/order.model.js";
 import crypto from "crypto";
 import razorpay from "../config/razorpay.js";
 import Notification from "../models/notification.model.js";
-import User from "../models/User.model.js";
+import User from "../models/user.model.js";
 import { io } from "../config/socket.js";
 
 
