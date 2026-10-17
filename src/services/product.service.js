@@ -6,6 +6,8 @@ import ProductMedia from "../models/productMedia.model.js";
 import ProductOption from "../models/productOption.model.js";
 import ProductOptionValue from "../models/productOptionValue.model.js";
 import PriceSlab from "../models/priceSlab.model.js";
+import Filament from "../models/filament.model.js";
+import FilamentColor from "../models/filamentColor.model.js";
 import { httpError } from "../utils/httpError.js";
 import { destroyFromCloudinary } from "../utils/cloudinaryUpload.js";
 import mongoose from "mongoose";
@@ -343,6 +345,27 @@ export const getProductByIdService = async (id) => {
         )
     }));
 
+    // Nest filament colors into the response so the storefront picker
+    // doesn't need a second round-trip per filament.
+    const filamentIds = product.filaments || [];
+    const [filamentDocs, filamentColors] = filamentIds.length
+        ? await Promise.all([
+            Filament.find({ _id: { $in: filamentIds }, isActive: true })
+                .sort({ type: 1, name: 1 })
+                .lean(),
+            FilamentColor.find({ filament: { $in: filamentIds } })
+                .sort({ name: 1 })
+                .lean()
+        ])
+        : [[], []];
+
+    const filaments = filamentDocs.map((f) => ({
+        ...f,
+        colors: filamentColors.filter(
+            (c) => c.filament.toString() === f._id.toString()
+        )
+    }));
+
     return {
         message: "Product fetched successfully",
         data: {
@@ -350,8 +373,27 @@ export const getProductByIdService = async (id) => {
             specs,
             media,
             options: optionsWithValues,
-            priceSlabs
+            priceSlabs,
+            filaments
         }
+    };
+};
+
+export const setProductFilamentsService = async (id, filamentIds) => {
+    const ids = Array.isArray(filamentIds)
+        ? filamentIds.filter((v) => mongoose.isValidObjectId(v))
+        : [];
+
+    const product = await Product.findByIdAndUpdate(
+        id,
+        { filaments: ids },
+        { new: true, runValidators: true }
+    );
+    if (!product) throw httpError(404, "Product not found");
+
+    return {
+        message: "Product filaments updated",
+        data: { product }
     };
 };
 

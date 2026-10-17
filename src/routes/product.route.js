@@ -7,7 +7,8 @@ import {
     updateProduct,
     deleteProduct,
     getSuggestedProducts,
-    getBestSellerProducts
+    getBestSellerProducts,
+    setProductFilaments
 } from "../controllers/product.controller.js";
 
 import {
@@ -274,6 +275,13 @@ router.get("/:id", getProductById);
 router.post("/", protect, authorize("admin"), createProduct);
 
 router.put("/:id", protect, authorize("admin"), updateProduct);
+
+router.put(
+    "/:id/filaments",
+    protect,
+    authorize("admin"),
+    setProductFilaments
+);
 
 router.delete("/:id", protect, authorize("admin"), deleteProduct);
 

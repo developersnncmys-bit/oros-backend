@@ -99,7 +99,16 @@ const productSchema = new mongoose.Schema(
             type: String,
             trim: true,
             default: ""
-        }
+        },
+
+        // Which filaments this product can be made in. Empty = not a
+        // filament-selectable product (storefront skips the picker).
+        filaments: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Filament"
+            }
+        ]
     },
     {
         timestamps: true

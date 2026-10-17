@@ -4,7 +4,16 @@ import {
     getProductByIdService,
     updateProductService,
     deleteProductService,getSuggestedProductsService,  getBestSellerProductsService,
+    setProductFilamentsService
 } from "../services/product.service.js";
+
+export const setProductFilaments = async (req, res) => {
+    const { message, data } = await setProductFilamentsService(
+        req.params.id,
+        req.body?.filaments
+    );
+    res.status(200).json({ success: true, message, data });
+};
 
 export const getProducts = async (req, res) => {
 

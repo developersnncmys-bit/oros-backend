@@ -31,6 +31,12 @@ import Quotation
 
     import { clearCartService } from "./cart.service.js";
 
+    import {
+        assertColorsAvailable,
+        decrementColorStocks,
+        restoreColorStocks
+    } from "./filament.service.js";
+
 export const getMyOrdersService =
     async (
         userId,
@@ -268,6 +274,18 @@ export const createOrderService = async (
         await calculateCartPricing(
             cartItems
         );
+
+
+    // ==========================================
+    // 3b. Filament color stock gate
+    // ==========================================
+    //
+    // Reject the order if any item's selected color is OOS. Decrement
+    // happens later at payment success — this is just the hard-fail
+    // "someone else bought the last unit while you were checking out"
+    // check.
+
+    await assertColorsAvailable(pricing.items);
 
 
     // ==========================================
@@ -1499,12 +1517,22 @@ export const cancelStoreOrderService = async (
 
 
     // ==========================================
-    // 4. Cancel order
+    // 4. Cancel order + restore filament stock
     // ==========================================
+    //
+    // Stock was only decremented at payment success, so only paid orders
+    // need to release their reservation back to the catalog.
+
+    const wasPaid = order.payment?.status === "PAID";
 
     order.status = "CANCELLED";
 
     await order.save();
+
+    if (wasPaid) {
+        const items = await OrderItem.find({ order: order._id }).lean();
+        await restoreColorStocks(items);
+    }
 
 
     // ==========================================
@@ -1604,12 +1632,20 @@ export const updateStoreOrderStatusService = async (
 
 
     // ==========================================
-    // 5. Update status
+    // 5. Update status + maybe restore filament stock
     // ==========================================
+
+    const wasPaid = order.payment?.status === "PAID";
+    const nowCancelled = status === "CANCELLED";
 
     order.status = status;
 
     await order.save();
+
+    if (nowCancelled && wasPaid) {
+        const items = await OrderItem.find({ order: order._id }).lean();
+        await restoreColorStocks(items);
+    }
 
 
     // ==========================================

@@ -1,9 +1,11 @@
 import Order from "../models/order.model.js";
+import OrderItem from "../models/orderItem.model.js";
 import crypto from "crypto";
 import razorpay from "../config/razorpay.js";
 import Notification from "../models/notification.model.js";
 import User from "../models/user.model.js";
 import { io } from "../config/socket.js";
+import { decrementColorStocks } from "./filament.service.js";
 
 
 
@@ -113,6 +115,18 @@ export const verifyUserPayment = async ({
     order.status = "PAID";
 
     await order.save();
+
+    // Decrement filament color inventory for every item that picked a
+    // color. Payment is already captured, so if any color goes negative
+    // we log a warning rather than fail — admin can refund manually.
+    const items = await OrderItem.find({ order: order._id }).lean();
+    const { warnings } = await decrementColorStocks(items);
+    if (warnings.length) {
+        console.warn(
+            `[payment] stock warnings on order ${order._id}:`,
+            warnings
+        );
+    }
 
     const admin = await User.findOne({
         role: "admin"

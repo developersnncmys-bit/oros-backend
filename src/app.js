@@ -21,6 +21,7 @@ import analyticsRoutes from "./routes/analytics.route.js";
 import couponRoutes from "./routes/coupon.routes.js";
 import viewProductRoutes from "./routes/view.route.js";
 import notificationRoutes from "./routes/notification.routes.js";
+import filamentRoutes from "./routes/filament.route.js";
 
 const app = expres();
 
@@ -53,6 +54,7 @@ app.use(
     "/api/notifications",
     notificationRoutes
 );
+app.use("/api/filaments", filamentRoutes);
 
 app.use(errorHandler)
 
