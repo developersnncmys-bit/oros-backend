@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 import Notification from "../models/notification.model.js";
 import { ObjectPart$ } from "@aws-sdk/client-s3";
 import { create } from "axios";
-import { io } from "../../server.js";
+import { io } from "../config/socket.js";
 
 /*
 --------------------------------

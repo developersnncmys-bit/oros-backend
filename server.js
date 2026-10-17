@@ -3,6 +3,7 @@ import express from "express"
 import app from "./src/app.js";
 import http from "http"
 import { Server } from "socket.io";
+import { setIO } from "./src/config/socket.js";
 
 
 const PORT = process.env.PORT;
@@ -15,6 +16,8 @@ export const io = new Server(server, {
       credentials: true
    }
 });
+
+setIO(io);
 io.on("connection", (socket) => {
 
    console.log("connected", socket.id);
