@@ -22,6 +22,7 @@ import couponRoutes from "./routes/coupon.routes.js";
 import viewProductRoutes from "./routes/view.route.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import filamentRoutes from "./routes/filament.route.js";
+import colorFamilyRoutes from "./routes/colorFamily.route.js";
 
 const app = expres();
 
@@ -55,6 +56,7 @@ app.use(
     notificationRoutes
 );
 app.use("/api/filaments", filamentRoutes);
+app.use("/api/color-families", colorFamilyRoutes);
 
 app.use(errorHandler)
 

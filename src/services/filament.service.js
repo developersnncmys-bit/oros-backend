@@ -10,7 +10,10 @@ Filaments
 */
 
 export const listFilamentsService = async () => {
-    const filaments = await Filament.find().sort({ type: 1, name: 1 }).lean();
+    const filaments = await Filament.find()
+        .populate("colorFamily", "name displayOrder isActive")
+        .sort({ type: 1, name: 1 })
+        .lean();
 
     const colors = await FilamentColor.find({
         filament: { $in: filaments.map((f) => f._id) }
@@ -42,6 +45,8 @@ export const createFilamentService = async (data) => {
     const filament = await Filament.create({
         name: data.name,
         type: data.type,
+        colorFamily: data.colorFamily || null,
+        finish: data.finish || "",
         priceDelta: Number(data.priceDelta) || 0,
         priceMultiplier: Number(data.priceMultiplier) || 1,
         isActive: data.isActive !== false
@@ -59,6 +64,10 @@ export const updateFilamentService = async (id, data) => {
         {
             ...(data.name !== undefined && { name: data.name }),
             ...(data.type !== undefined && { type: data.type }),
+            ...(data.colorFamily !== undefined && {
+                colorFamily: data.colorFamily || null
+            }),
+            ...(data.finish !== undefined && { finish: data.finish }),
             ...(data.priceDelta !== undefined && {
                 priceDelta: Number(data.priceDelta)
             }),

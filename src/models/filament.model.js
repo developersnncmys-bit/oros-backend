@@ -16,6 +16,25 @@ const filamentSchema = new mongoose.Schema(
             trim: true
         },
 
+        // Optional top-level grouping ("Pure", "Radiant", "Special" per the
+        // inventory PDF). Nullable so legacy filaments survive without
+        // backfill; admin can assign later.
+        colorFamily: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "ColorFamily",
+            default: null
+        },
+
+        // The parenthetical from the inventory PDF — "Regular", "Matte",
+        // "Silk", "Metallic", "Glow", "Sparkle", "Translucent", etc.
+        // Free text with admin-side suggestions so new finishes don't
+        // require a backend change.
+        finish: {
+            type: String,
+            trim: true,
+            default: ""
+        },
+
         // Flat ₹ added to base product price when this filament is chosen
         priceDelta: {
             type: Number,

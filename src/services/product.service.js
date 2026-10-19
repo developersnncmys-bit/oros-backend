@@ -351,6 +351,7 @@ export const getProductByIdService = async (id) => {
     const [filamentDocs, filamentColors] = filamentIds.length
         ? await Promise.all([
             Filament.find({ _id: { $in: filamentIds }, isActive: true })
+                .populate("colorFamily", "name displayOrder isActive")
                 .sort({ type: 1, name: 1 })
                 .lean(),
             FilamentColor.find({ filament: { $in: filamentIds } })
