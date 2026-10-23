@@ -30,6 +30,29 @@ const productOptionValueSchema = new mongoose.Schema(
             type: Number,
             default: 1,
             min: 1
+        },
+
+        // Physical dimensions, meaningful on Size-type options. All optional;
+        // null means "not set" and the storefront simply omits the line.
+        length: {
+            type: Number,
+            default: null,
+            min: 0
+        },
+        width: {
+            type: Number,
+            default: null,
+            min: 0
+        },
+        height: {
+            type: Number,
+            default: null,
+            min: 0
+        },
+        unit: {
+            type: String,
+            enum: ["mm", "cm", "in"],
+            default: "cm"
         }
     },
     {

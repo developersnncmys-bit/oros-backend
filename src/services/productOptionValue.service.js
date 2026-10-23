@@ -58,6 +58,9 @@ export const createOptionValueService = async (optionId, data) => {
         throw httpError(400, "value is required");
     }
 
+    const toDimension = (v) =>
+        v === undefined || v === null || v === "" ? null : Number(v);
+
     const optionValue = await ProductOptionValue.create({
         option: optionId,
         value: data.value,
@@ -72,7 +75,11 @@ export const createOptionValueService = async (optionId, data) => {
         sortOrder:
             data.sortOrder !== undefined
                 ? Number(data.sortOrder)
-                : await nextSortOrder(optionId)
+                : await nextSortOrder(optionId),
+        length: toDimension(data.length),
+        width: toDimension(data.width),
+        height: toDimension(data.height),
+        ...(data.unit !== undefined && { unit: data.unit })
     });
 
     return {
@@ -91,6 +98,9 @@ export const updateOptionValueService = async (
 
     await ensureOption(optionId);
 
+    const toDimension = (v) =>
+        v === null || v === "" ? null : Number(v);
+
     const optionValue = await ProductOptionValue.findOneAndUpdate(
         {
             _id: valueId,
@@ -106,7 +116,11 @@ export const updateOptionValueService = async (
             }),
             ...(data.sortOrder !== undefined && {
                 sortOrder: Number(data.sortOrder)
-            })
+            }),
+            ...(data.length !== undefined && { length: toDimension(data.length) }),
+            ...(data.width !== undefined && { width: toDimension(data.width) }),
+            ...(data.height !== undefined && { height: toDimension(data.height) }),
+            ...(data.unit !== undefined && { unit: data.unit })
         },
         {
             new: true,

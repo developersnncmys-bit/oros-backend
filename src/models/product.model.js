@@ -71,6 +71,42 @@ const productSchema = new mongoose.Schema(
             default: false
         },
 
+        allowDualColor: {
+            type: Boolean,
+            default: false
+        },
+
+        dualColorSurcharge: {
+            type: Number,
+            default: 0,
+            min: 0
+        },
+
+        // Admin-defined whitelist of {primary, secondary} FilamentColor pairs
+        // for this product. When empty and allowDualColor is true, every
+        // combination is allowed (back-compat). When non-empty, the Primary
+        // picker on the PDP only shows colours that appear in some pair, and
+        // the Secondary picker only shows colours paired with the selected
+        // Primary. Pairs are treated as unordered: {A,B} === {B,A}.
+        allowedColorCombos: {
+            type: [
+                {
+                    _id: false,
+                    primary: {
+                        type: mongoose.Schema.Types.ObjectId,
+                        ref: "FilamentColor",
+                        required: true
+                    },
+                    secondary: {
+                        type: mongoose.Schema.Types.ObjectId,
+                        ref: "FilamentColor",
+                        required: true
+                    }
+                }
+            ],
+            default: []
+        },
+
         minQty: {
             type: Number,
             default: 1,
