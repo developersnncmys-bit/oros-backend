@@ -410,12 +410,26 @@ export const createOrderService = async (
     // 6. Get selected shipping
     // ==========================================
 
+    // TEST ONLY — fall back to a zero-charge stub when no shipping quote is
+    // supplied, so Razorpay can be exercised without a working Shiprocket
+    // account. Remove this branch (keep only the else) before going live.
     const shipping =
-        await getSelectedShippingRate(
-            userId,
-            shippingQuoteId,
-            shippingCourierId
-        );
+        shippingQuoteId
+            ? await getSelectedShippingRate(
+                userId,
+                shippingQuoteId,
+                shippingCourierId
+            )
+            : {
+                pickupPincode:
+                    process.env.SHIPMENT_PICKUP_PINCODE || "",
+                deliveryPincode:
+                    address.pincode,
+                courierId: 0,
+                courierName: "TEST",
+                shippingCharge: 0,
+                estimatedDelivery: null
+            };
 
 
     // ==========================================

@@ -25,8 +25,14 @@ export const createUserPaymentOrder = async (orderId) => {
         throw new Error("Order is not available for payment");
     }
 
+    const amountPaise = Math.round(order.pricing.total * 100);
+
+    if (amountPaise < 100) {
+        throw new Error("Order amount must be at least ₹1");
+    }
+
     const options = {
-        amount: Math.round(order.pricing.total * 100),
+        amount: amountPaise,
         currency: "INR",
         receipt: order._id.toString()
     };
