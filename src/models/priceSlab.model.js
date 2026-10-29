@@ -21,10 +21,11 @@ const priceSlabSchema = new mongoose.Schema(
             min: 1
         },
 
-        unitPrice: {
+        discountPercent: {
             type: Number,
             required: true,
-            min: 0
+            min: 0,
+            max: 99
         }
     },
     {

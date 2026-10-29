@@ -4,6 +4,9 @@ import ProductOption
 import ProductOptionValue
     from "../models/productOptionValue.model.js";
 
+import PriceSlab
+    from "../models/priceSlab.model.js";
+
 
 export const calculateCartPricing =
     async (cartItems) => {
@@ -150,6 +153,32 @@ export const calculateCartPricing =
 
                 unitPrice *=
                     optionValue.priceMultiplier || 1;
+            }
+
+
+            /*
+             * Apply bulk discount slab for this quantity, if any.
+             * A slab matches when qty is within [minQty, maxQty]
+             * (maxQty null means "and above").
+             */
+
+            const slabs =
+                await PriceSlab.find({
+                    product: product._id
+                })
+                    .sort({ minQty: 1 })
+                    .lean();
+
+            const matchingSlab =
+                slabs.find(
+                    (s) =>
+                        cartItem.qty >= s.minQty &&
+                        (s.maxQty == null || cartItem.qty <= s.maxQty)
+                );
+
+            if (matchingSlab) {
+                unitPrice *=
+                    1 - (Number(matchingSlab.discountPercent) || 0) / 100;
             }
 
 

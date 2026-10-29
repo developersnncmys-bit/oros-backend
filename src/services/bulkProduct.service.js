@@ -99,8 +99,8 @@ export const buildImportTemplateBuffer = () => {
             }
         ]),
         price_slabs: JSON.stringify([
-            { minQty: 1, maxQty: 9, unitPrice: 499 },
-            { minQty: 10, maxQty: 49, unitPrice: 450 }
+            { minQty: 25, maxQty: 49, discountPercent: 5 },
+            { minQty: 50, maxQty: null, discountPercent: 10 }
         ])
     };
 
@@ -373,7 +373,7 @@ const validateRow = async (row, context) => {
                 slab?.maxQty === ""
                 ? null
                 : Number(slab.maxQty);
-        const unitPrice = Number(slab?.unitPrice);
+        const discountPercent = Number(slab?.discountPercent);
 
         if (!Number.isFinite(min) || min < 1) {
             throw new Error("price slab minQty must be 1 or more");
@@ -385,13 +385,17 @@ const validateRow = async (row, context) => {
             );
         }
 
-        if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+        if (
+            !Number.isFinite(discountPercent) ||
+            discountPercent < 0 ||
+            discountPercent > 99
+        ) {
             throw new Error(
-                "price slab unitPrice must be a positive number"
+                "price slab discountPercent must be between 0 and 99"
             );
         }
 
-        return { minQty: min, maxQty: max, unitPrice };
+        return { minQty: min, maxQty: max, discountPercent };
     });
 
     return {

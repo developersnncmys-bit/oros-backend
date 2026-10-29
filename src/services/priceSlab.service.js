@@ -47,8 +47,12 @@ const validateSlab = async (productId, slab, excludeId = null) => {
         );
     }
 
-    if (!Number.isFinite(slab.unitPrice) || slab.unitPrice < 0) {
-        throw httpError(400, "unitPrice must be a positive number");
+    if (
+        !Number.isFinite(slab.discountPercent) ||
+        slab.discountPercent < 0 ||
+        slab.discountPercent > 99
+    ) {
+        throw httpError(400, "discountPercent must be between 0 and 99");
     }
 
     const filter = { product: productId };
@@ -80,10 +84,10 @@ const readSlabInput = (data, fallback = {}) => ({
                 ? null
                 : Number(data.maxQty)
             : fallback.maxQty ?? null,
-    unitPrice:
-        data.unitPrice !== undefined
-            ? Number(data.unitPrice)
-            : fallback.unitPrice
+    discountPercent:
+        data.discountPercent !== undefined
+            ? Number(data.discountPercent)
+            : fallback.discountPercent
 });
 
 export const getPriceSlabsService = async (productId) => {
