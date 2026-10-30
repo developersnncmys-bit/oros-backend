@@ -6,7 +6,12 @@ const addressSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
-            unique: true,
+            index: true
+        },
+
+        isDefault: {
+            type: Boolean,
+            default: false,
             index: true
         },
 

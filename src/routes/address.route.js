@@ -1,9 +1,10 @@
 import express from "express";
 
 import {
-    upsertAddressController,
-    getAddressController,
+    listAddressesController,
+    createAddressController,
     updateAddressController,
+    setDefaultAddressController,
     deleteAddressController
 } from "../controllers/address.controller.js";
 
@@ -18,28 +19,15 @@ const router = express.Router();
 router.use(protect);
 
 
-router.post(
-    "/",
-    upsertAddressController
-);
+router.get("/", listAddressesController);
 
+router.post("/", createAddressController);
 
-router.get(
-    "/",
-    getAddressController
-);
+router.patch("/:id", updateAddressController);
 
+router.patch("/:id/default", setDefaultAddressController);
 
-router.patch(
-    "/",
-    updateAddressController
-);
-
-
-router.delete(
-    "/",
-    deleteAddressController
-);
+router.delete("/:id", deleteAddressController);
 
 
 export default router;

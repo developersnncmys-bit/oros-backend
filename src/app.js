@@ -23,6 +23,7 @@ import viewProductRoutes from "./routes/view.route.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import filamentRoutes from "./routes/filament.route.js";
 import colorFamilyRoutes from "./routes/colorFamily.route.js";
+import personalisationRoutes from "./routes/personalisation.route.js";
 
 const app = expres();
 
@@ -57,6 +58,7 @@ app.use(
 );
 app.use("/api/filaments", filamentRoutes);
 app.use("/api/color-families", colorFamilyRoutes);
+app.use("/api/personalisation", personalisationRoutes);
 
 app.use(errorHandler)
 

@@ -41,6 +41,32 @@ export const subCategoryUpload = createUpload("oros/product");
 export const bannerUpload =createUpload("oros/banner");
 export const profileUpload = createUpload("oros/profile");
 
+// Customer-uploaded logo attached to a cart line's personalisation.
+// Images only, small cap — this is a decoration asset, not a 3D model.
+const personalisationLogoStorage = new CloudinaryStorage({
+    cloudinary: getCloudinary(),
+    params: {
+        folder: "oros/personalisation",
+        allowed_formats: ["jpg", "jpeg", "png", "webp"],
+        resource_type: "image"
+    }
+});
+
+export const personalisationLogoUpload = multer({
+    storage: personalisationLogoStorage,
+    fileFilter: (req, file, cb) => {
+        if (!file.mimetype?.startsWith("image/")) {
+            return cb(
+                new Error("Only jpg, jpeg, png or webp images are allowed")
+            );
+        }
+        cb(null, true);
+    },
+    limits: {
+        fileSize: 5 * 1024 * 1024
+    }
+});
+
 const ALLOWED_3D_FORMATS = [
     ".stl",
     ".obj",

@@ -12,6 +12,8 @@ import ShippingPackage
 import Address
     from "../models/address.model.js";
 
+import { findResolvedAddress } from "./address.service.js";
+
 import httpError
     from "../utils/httpError.js";
 
@@ -29,16 +31,19 @@ import ShippingQuote
 
 
 export const prepareShippingService =
-    async (userId) => {
+    async (userId, addressId) => {
 
         /*
-         * 1. Get customer address
+         * 1. Get customer address — a specific one when the caller
+         *    picked one at checkout, otherwise fall back to the user's
+         *    default (or most-recently updated) address.
          */
 
         const address =
-            await Address.findOne({
-                user: userId
-            }).lean();
+            await findResolvedAddress(
+                userId,
+                addressId
+            );
 
 
         if (!address) {
@@ -296,7 +301,8 @@ export const getShippingRatesService =
     ) => {
 
         const {
-            deliveryPincode
+            deliveryPincode,
+            addressId
         } = data;
 
 
@@ -332,7 +338,8 @@ export const getShippingRatesService =
 
         const shippingData =
             await prepareShippingService(
-                userId
+                userId,
+                addressId
             );
 
 

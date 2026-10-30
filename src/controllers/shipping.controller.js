@@ -8,7 +8,8 @@ export const prepareShippingController =
 
         const result =
             await prepareShippingService(
-                req.user.id
+                req.user.id,
+                req.body?.addressId || req.query?.addressId
             );
 
         return res

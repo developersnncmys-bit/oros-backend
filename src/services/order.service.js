@@ -5,6 +5,8 @@ import User from "../models/user.model.js";
 import Address
     from "../models/address.model.js";
 
+import { findResolvedAddress } from "./address.service.js";
+
 import Order
     from "../models/order.model.js";
 
@@ -212,7 +214,8 @@ export const createOrderService = async (
     {
         shippingQuoteId,
         shippingCourierId,
-        couponCode
+        couponCode,
+        addressId
     }
 ) => {
 
@@ -394,9 +397,10 @@ export const createOrderService = async (
     // ==========================================
 
     const address =
-        await Address.findOne({
-            user: userId
-        }).lean();
+        await findResolvedAddress(
+            userId,
+            addressId
+        );
 
     if (!address) {
         throw httpError(
