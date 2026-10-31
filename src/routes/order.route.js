@@ -8,7 +8,9 @@ import {
      createManualOrder,
      createQuotationOrderController ,
      cancelStoreOrderController,
-     updateStoreOrderStatusController
+     updateStoreOrderStatusController,
+     retryShipmentFulfilmentController,
+     schedulePickupController
 } from "../controllers/order.controller.js";
 import { protect ,authorize} from "../middlewares/auth.middleware.js";
 
@@ -62,7 +64,24 @@ router.post(
     createQuotationOrderController
 );
 
+// Admin: re-run Shiprocket fulfilment for an order whose automatic
+// post-payment attempt failed. Idempotent on the service side — if the
+// order was already synced, it short-circuits.
+router.post(
+    "/:id/shipment/retry",
+    protect,
+    authorize("admin"),
+    retryShipmentFulfilmentController
+);
 
+// Admin: schedule the courier pickup for an order that already has an
+// assigned AWB.
+router.post(
+    "/:id/shipment/pickup",
+    protect,
+    authorize("admin"),
+    schedulePickupController
+);
 
 
 export default router;

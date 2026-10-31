@@ -10,6 +10,7 @@ export const notificationSchema= new mongoose.Schema({
         type:String,
         enum:[
             "ORDER_PAID_AND_PAYMENT_RECEIVED",
+            "ORDER_SHIPMENT_UPDATE",
             'QUOTATION_CREATED',
             "QUOTATION_FILE",
             "QUOTATION",

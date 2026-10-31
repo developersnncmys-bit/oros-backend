@@ -231,18 +231,11 @@ export const registerWithPasswordService = async ({ name, email, phone, password
     const normalizedEmail = String(email).trim().toLowerCase();
     const trimmedPhone = phone ? String(phone).trim() : "";
 
-    // email collisions block the signup; phone collisions do too when a
-    // phone was supplied. This keeps the uniqueness story consistent with
-    // the OTP-based register, which hinges on the phone index.
+    // Email is the uniqueness key — phone is no longer checked for collisions
+    // on signup (OTP-based register is disabled).
     const existingEmail = await User.findOne({ email: normalizedEmail });
     if (existingEmail) {
         throw new Error("An account with this email already exists, please login");
-    }
-    if (trimmedPhone) {
-        const existingPhone = await User.findOne({ phone: trimmedPhone });
-        if (existingPhone) {
-            throw new Error("An account with this phone already exists, please login");
-        }
     }
 
     const passwordHash = await bcrypt.hash(password, 10);

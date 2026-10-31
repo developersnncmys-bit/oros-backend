@@ -414,26 +414,23 @@ export const createOrderService = async (
     // 6. Get selected shipping
     // ==========================================
 
-    // TEST ONLY — fall back to a zero-charge stub when no shipping quote is
-    // supplied, so Razorpay can be exercised without a working Shiprocket
-    // account. Remove this branch (keep only the else) before going live.
+    // Every live order must reference a Shiprocket quote the frontend
+    // already locked in — otherwise the shipping charge the shopper saw
+    // on the Pay button could silently drift away from what we actually
+    // bill, and we'd have no courier assigned for AWB generation later.
+    if (!shippingQuoteId || !shippingCourierId) {
+        throw httpError(
+            400,
+            "A delivery option must be selected before placing the order"
+        );
+    }
+
     const shipping =
-        shippingQuoteId
-            ? await getSelectedShippingRate(
-                userId,
-                shippingQuoteId,
-                shippingCourierId
-            )
-            : {
-                pickupPincode:
-                    process.env.SHIPMENT_PICKUP_PINCODE || "",
-                deliveryPincode:
-                    address.pincode,
-                courierId: 0,
-                courierName: "TEST",
-                shippingCharge: 0,
-                estimatedDelivery: null
-            };
+        await getSelectedShippingRate(
+            userId,
+            shippingQuoteId,
+            shippingCourierId
+        );
 
 
     // ==========================================
@@ -529,7 +526,12 @@ export const createOrderService = async (
                     shipping.shippingCharge,
 
                 estimatedDelivery:
-                    shipping.estimatedDelivery
+                    shipping.estimatedDelivery,
+
+                // Snapshotted from the Shiprocket quote so the post-payment
+                // fulfilment call doesn't need to re-pack or re-quote.
+                packages:
+                    shipping.packages || []
             },
 
             payment: {

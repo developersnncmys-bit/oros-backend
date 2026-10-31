@@ -22,7 +22,8 @@ import {
 } from "./packing.service.js";
 
 import {
-    getShiprocketRates
+    getShiprocketRates,
+    getShiprocketPickupPincode
 } from "./shiprocket.service.js";
 
 import ShippingQuote
@@ -230,21 +231,12 @@ export const prepareShippingService =
 
 
         /*
-         * 8. Pickup location
+         * 8. Pickup location — resolved from the Shiprocket dashboard
+         * via SHIPROCKET_PICKUP_LOCATION (defaults to "Primary").
          */
 
         const pickupPincode =
-            process.env
-                .SHIPMENT_PICKUP_PINCODE;
-
-
-        if (!pickupPincode) {
-
-            throw httpError(
-                500,
-                "Shipment pickup pincode is not configured"
-            );
-        }
+            await getShiprocketPickupPincode();
 
 
         /*
@@ -360,21 +352,12 @@ export const getShippingRatesService =
 
 
         /*
-         * 3. Pickup pincode
+         * 3. Pickup pincode — resolved from the Shiprocket dashboard
+         * via SHIPROCKET_PICKUP_LOCATION (defaults to "Primary").
          */
 
         const pickupPincode =
-            process.env
-                .SHIPMENT_PICKUP_PINCODE;
-
-
-        if (!pickupPincode) {
-
-            throw httpError(
-                500,
-                "Shipment pickup pincode is not configured"
-            );
-        }
+            await getShiprocketPickupPincode();
 
 
         /*

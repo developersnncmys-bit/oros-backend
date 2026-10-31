@@ -6,8 +6,13 @@ import {
         createQuotationOrderService,
         cancelStoreOrderService,
         updateStoreOrderStatusService
-    
+
 } from "../services/order.service.js";
+
+import {
+    fulfilOrderWithShiprocket,
+    schedulePickupForOrder
+} from "../services/shipment.service.js";
 
 
 export const createOrderController =
@@ -139,4 +144,65 @@ export const updateStoreOrderStatusController =
                 success: true,
                 ...result
             });
+    };
+
+
+// ==========================================
+// ADMIN: Retry Shiprocket fulfilment
+// Used when the automatic post-payment fulfilment left an error on
+// order.shipping.error (e.g. courier briefly out of service) and the
+// admin wants to try again without re-triggering payment.
+// ==========================================
+
+export const retryShipmentFulfilmentController =
+    async (req, res, next) => {
+        try {
+            const result =
+                await fulfilOrderWithShiprocket(req.params.id);
+
+            if (!result.ok) {
+                return res.status(502).json({
+                    success: false,
+                    message:
+                        result.reason ||
+                        "Shiprocket fulfilment failed",
+                    data: {
+                        order: result.order || null
+                    }
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: "Shiprocket fulfilment succeeded",
+                data: {
+                    order: result.order
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+
+// ==========================================
+// ADMIN: Request Shiprocket pickup
+// Separate from AWB assignment — admin triggers this when the parcel
+// is physically ready to be handed over to the courier.
+// ==========================================
+
+export const schedulePickupController =
+    async (req, res, next) => {
+        try {
+            const result =
+                await schedulePickupForOrder(req.params.id);
+
+            return res.status(200).json({
+                success: true,
+                message: "Pickup scheduled with Shiprocket",
+                data: result
+            });
+        } catch (error) {
+            next(error);
+        }
     };

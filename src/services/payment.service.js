@@ -6,6 +6,7 @@ import Notification from "../models/notification.model.js";
 import User from "../models/user.model.js";
 import { io } from "../config/socket.js";
 import { decrementColorStocks } from "./filament.service.js";
+import { fulfilOrderWithShiprocket } from "./shipment.service.js";
 
 
 
@@ -148,6 +149,29 @@ export const verifyUserPayment = async ({
         });
         io.to("admin").emit("new_notification",notification);
     }
+
+    // Kick off Shiprocket fulfilment in the background. We don't await
+    // it: payment is already captured, and we never want a Shiprocket
+    // hiccup to make the shopper see a "payment failed" screen. Any
+    // failure is written to order.shipping.error for admin follow-up,
+    // and admin can retry from the orders view.
+    fulfilOrderWithShiprocket(order._id)
+        .then((result) => {
+            if (!result.ok) {
+                console.warn(
+                    `[payment] Shiprocket fulfilment deferred for order ${order._id}: ${result.reason}`
+                );
+            }
+        })
+        .catch((error) => {
+            // fulfilOrderWithShiprocket already swallows and records
+            // errors; this catch only fires if the orchestrator itself
+            // threw unexpectedly.
+            console.error(
+                `[payment] Unhandled fulfilment error for order ${order._id}:`,
+                error?.message || error
+            );
+        });
 
     return {
         message:
