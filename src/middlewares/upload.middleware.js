@@ -47,7 +47,7 @@ const personalisationLogoStorage = new CloudinaryStorage({
     cloudinary: getCloudinary(),
     params: {
         folder: "oros/personalisation",
-        allowed_formats: ["jpg", "jpeg", "png", "webp"],
+        allowed_formats: ["jpg", "jpeg", "png", "webp", "svg"],
         resource_type: "image"
     }
 });
@@ -57,7 +57,7 @@ export const personalisationLogoUpload = multer({
     fileFilter: (req, file, cb) => {
         if (!file.mimetype?.startsWith("image/")) {
             return cb(
-                new Error("Only jpg, jpeg, png or webp images are allowed")
+                new Error("Only jpg, jpeg, png, webp or svg images are allowed")
             );
         }
         cb(null, true);

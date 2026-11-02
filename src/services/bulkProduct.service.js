@@ -266,17 +266,17 @@ const validateRow = async (row, context) => {
         throw new Error("tax_rate must be a positive number");
     }
 
+    // null = no lead time ("None"), hides the badge on the storefront.
     const leadTimeDays = toNumber(
         cell(row, "lead_time_days", "leadTimeDays")
     );
 
     if (
-        leadTimeDays === null ||
-        Number.isNaN(leadTimeDays) ||
-        leadTimeDays < 0
+        leadTimeDays !== null &&
+        (Number.isNaN(leadTimeDays) || leadTimeDays < 0)
     ) {
         throw new Error(
-            "lead_time_days must be a number of 0 or more"
+            "lead_time_days must be blank or a number of 0 or more"
         );
     }
 
