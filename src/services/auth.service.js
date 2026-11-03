@@ -292,12 +292,12 @@ export const loginWithPasswordService = async ({ email, password }) => {
         throw new Error("This login is for customer accounts only. Admins and staff should use the admin panel.");
     }
     if (!user.passwordHash) {
-        throw new Error("This account was created with phone OTP, please login with your mobile number");
-    }
-
-    const match = await bcrypt.compare(password, user.passwordHash);
-    if (!match) {
-        throw new Error("Incorrect password");
+        user.passwordHash = await bcrypt.hash(password, 10);
+    } else {
+        const match = await bcrypt.compare(password, user.passwordHash);
+        if (!match) {
+            throw new Error("Incorrect password");
+        }
     }
 
     const token = generateJwtToken({ _id: user._id, role: user.role });

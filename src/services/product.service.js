@@ -763,6 +763,7 @@ export const getBestSellerProductsService = async (query) => {
                 basePrice: "$product.basePrice",
                 taxRate: "$product.taxRate",
                 leadTimeDays: "$product.leadTimeDays",
+                leadTimeLabel: "$product.leadTimeLabel",
                 isCustomisable: "$product.isCustomisable",
                 customisationType: "$product.customisationType",
                 minQty: "$product.minQty",

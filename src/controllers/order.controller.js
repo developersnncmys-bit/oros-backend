@@ -5,7 +5,8 @@ import {
     createManualOrderService,
         createQuotationOrderService,
         cancelStoreOrderService,
-        updateStoreOrderStatusService
+        updateStoreOrderStatusService,
+        deleteOrderService
 
 } from "../services/order.service.js";
 
@@ -206,3 +207,16 @@ export const schedulePickupController =
             next(error);
         }
     };
+
+
+// ==========================================
+// ADMIN: Delete order (hard delete — removes order + line items)
+// ==========================================
+
+export const deleteOrderController = async (req, res) => {
+    const result = await deleteOrderService(req.params.id);
+    return res.status(200).json({
+        success: true,
+        ...result
+    });
+};

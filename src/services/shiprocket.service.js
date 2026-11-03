@@ -256,18 +256,41 @@ export const getShiprocketPickupPincode = async () => {
 // "500 Request failed".
 const extractShiprocketError = (error, fallback) => {
     const data = error?.response?.data;
-    if (data?.message) return String(data.message);
     if (typeof data === "string") return data;
+    // Per-field errors first — Shiprocket often returns "Oops! Invalid Data."
+    // as `message` while the actual broken field lives under `errors`.
     if (data?.errors && typeof data.errors === "object") {
-        const first = Object.values(data.errors)[0];
-        if (Array.isArray(first) && first.length) return String(first[0]);
+        const parts = Object.entries(data.errors)
+            .map(([field, msgs]) => {
+                const text = Array.isArray(msgs) ? msgs.join(", ") : String(msgs);
+                return `${field}: ${text}`;
+            });
+        if (parts.length) {
+            const prefix = data.message ? `${data.message} — ` : "";
+            return `${prefix}${parts.join("; ")}`;
+        }
     }
+    if (data?.message) return String(data.message);
     return fallback;
 };
 
 
 const BOUNDING_BOX_ROUND = (n) =>
     Math.max(1, Math.round(Number(n) || 0));
+
+
+// Shiprocket's /orders/create/adhoc rejects anything in billing_phone that
+// isn't exactly 10 digits — no "+91", no spaces, no hyphens. Strip to digits
+// and drop a leading 91 country code if present.
+const normalizeIndianPhone = (raw) => {
+    const digits = String(raw || "").replace(/\D/g, "");
+    const trimmed = digits.length === 12 && digits.startsWith("91")
+        ? digits.slice(2)
+        : digits.length === 11 && digits.startsWith("0")
+            ? digits.slice(1)
+            : digits;
+    return trimmed.slice(-10);
+};
 
 
 // Shiprocket's /orders/create/adhoc wants a single outer box per order.
@@ -337,7 +360,7 @@ export const createShiprocketOrder = async (order, items) => {
         billing_state: addr.state || "",
         billing_country: addr.country || "India",
         billing_email: order.user?.email || "no-reply@oros.local",
-        billing_phone: addr.phone || "",
+        billing_phone: normalizeIndianPhone(addr.phone),
 
         shipping_is_billing: true,
 

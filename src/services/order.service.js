@@ -437,9 +437,11 @@ export const createOrderService = async (
     // 7. Calculate final total
     // ==========================================
 
+    // TEMP: testing — delivery charge excluded from Razorpay total so
+    // test payments stay at the item price. Restore `shipping.shippingCharge +`
+    // before going live.
     const total =
         pricing.subtotal +
-        shipping.shippingCharge +
         pricing.tax -
         discount;
 
@@ -1678,5 +1680,27 @@ export const updateStoreOrderStatusService = async (
         data: {
             order
         }
+    };
+};
+
+
+// ==========================================
+// ADMIN DELETE ORDER
+// Hard-delete the order and its line items. Does not touch Shiprocket —
+// if a shipment was already created, cancel it from the dashboard first.
+// ==========================================
+
+export const deleteOrderService = async (orderId) => {
+    const order = await Order.findById(orderId);
+    if (!order) {
+        throw httpError(404, "Order not found");
+    }
+
+    await OrderItem.deleteMany({ order: order._id });
+    await order.deleteOne();
+
+    return {
+        message: "Order deleted successfully",
+        data: { orderId: String(order._id) }
     };
 };

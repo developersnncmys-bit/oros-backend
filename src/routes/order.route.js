@@ -10,7 +10,8 @@ import {
      cancelStoreOrderController,
      updateStoreOrderStatusController,
      retryShipmentFulfilmentController,
-     schedulePickupController
+     schedulePickupController,
+     deleteOrderController
 } from "../controllers/order.controller.js";
 import { protect ,authorize} from "../middlewares/auth.middleware.js";
 
@@ -81,6 +82,16 @@ router.post(
     protect,
     authorize("admin"),
     schedulePickupController
+);
+
+// Admin: hard-delete an order. Removes the order and its line items.
+// Does not touch Shiprocket — cancel the shipment from the dashboard
+// first if one was created.
+router.delete(
+    "/:id",
+    protect,
+    authorize("admin"),
+    deleteOrderController
 );
 
 

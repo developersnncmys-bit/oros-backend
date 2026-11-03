@@ -66,6 +66,17 @@ const productSchema = new mongoose.Schema(
             min: 0
         },
 
+        // Optional override for the lead-time text shown on the storefront.
+        // When set, the website uses this verbatim; when blank, the frontend
+        // falls back to its default ("Ships in 48h" for 0 days,
+        // "Made in N days" otherwise).
+        leadTimeLabel: {
+            type: String,
+            default: "",
+            trim: true,
+            maxlength: 60
+        },
+
         isCustomisable: {
             type: Boolean,
             default: false
