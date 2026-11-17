@@ -1,4 +1,30 @@
 import {createBannerService,getBannersService,updateBannerByIdService,deleteBannerByIdService} from "../services/banner.service.js";
+import { getCloudinary } from "../config/cloudinary.js";
+
+// Banner media is uploaded straight from the admin browser to Cloudinary,
+// bypassing Vercel's 4.5 MB request-body limit. This endpoint hands back
+// a short-lived signature the browser needs to perform that upload.
+export const getBannerUploadSignature = async (req, res) => {
+    const timestamp = Math.round(Date.now() / 1000);
+    const folder = "oros/banner";
+
+    const signature = getCloudinary().utils.api_sign_request(
+        { timestamp, folder },
+        process.env.CLOUDINARY_API_SECRET
+    );
+
+    res.json({
+        success: true,
+        message: "upload signature",
+        data: {
+            signature,
+            timestamp,
+            apiKey: process.env.CLOUDINARY_API_KEY,
+            cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+            folder
+        }
+    });
+};
 
 export const createBanner =async(req,res)=>{
  const bannerdata = req.body;

@@ -38,8 +38,27 @@ const createUpload = (folder) => {
 export const categoryUpload = createUpload("oros/category");
 export const productUpload = createUpload("oros/product");
 export const subCategoryUpload = createUpload("oros/product");
-export const bannerUpload =createUpload("oros/banner");
 export const profileUpload = createUpload("oros/profile");
+
+// Banners: cap each media file so multer rejects oversized uploads before
+// the stream reaches Cloudinary. Without this, Cloudinary silently closes
+// the connection on huge files and the browser sees it as a Network Error.
+export const BANNER_MAX_FILE_MB = 10;
+
+const bannerStorage = new CloudinaryStorage({
+    cloudinary: getCloudinary(),
+    params: {
+        folder: "oros/banner",
+        allowed_formats: ["jpg", "jpeg", "png", "webp", "mp4", "mov", "webm"]
+    }
+});
+
+export const bannerUpload = multer({
+    storage: bannerStorage,
+    limits: {
+        fileSize: BANNER_MAX_FILE_MB * 1024 * 1024
+    }
+});
 
 // Customer-uploaded logo attached to a cart line's personalisation.
 // Images only, small cap — this is a decoration asset, not a 3D model.
