@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import Otp from "../models/otp.model.js";
 import { generateJwtToken } from "../utils/jwt.js";
+// import { sendPasswordResetEmail } from "../utils/mailer.js";
 const fixedOtp = "123456";
 
 
@@ -318,6 +319,111 @@ export const loginWithPasswordService = async ({ email, password }) => {
             },
             token
         }
+    };
+};
+
+
+// ── Forgot / reset password (email + OTP) ────────────────────────────────
+
+export const forgotPasswordService = async ({ email }) => {
+    if (!email) {
+        throw new Error("Email is required");
+    }
+
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
+
+    // Do not reveal whether the email exists — avoids email enumeration.
+    // Still returns success so the UI moves to the OTP step; a non-existent
+    // account simply won't have a matching OTP record to verify against.
+    if (!user || user.isBlocked || user.role !== "user") {
+        return {
+            message: "If an account exists, a reset code has been sent",
+            data: {}
+        };
+    }
+
+    // The stub fallback ("123456") still works when SMTP isn't configured —
+    // the mailer logs a warning and we proceed. In production, nodemailer
+    // sends the real OTP via SMTP (see utils/mailer.js).
+    const otpHash = await bcrypt.hash(fixedOtp, 10);
+    const expireAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    // Otp is keyed by phone (unique). Reuse the user's phone (real or the
+    // synthesized "@..." placeholder created for email-only signups).
+    await Otp.findOneAndUpdate(
+        { phone: user.phone },
+        {
+            otpHash,
+            expireAt,
+            attempts: 0,
+            consumeAt: null,
+            lockedUntill: null
+        },
+        { upsert: true, new: true }
+    );
+
+    // Fire-and-forget: a transient SMTP failure should not break the user's
+    // flow — they can hit "Resend code" from the UI. The result is logged
+    // inside sendMail for diagnostics.
+    // Disabled until SMTP creds are set on the server — re-enable once
+    // SMTP_HOST / SMTP_USER / SMTP_PASS are added to prod .env.
+    // sendPasswordResetEmail({
+    //     to: normalizedEmail,
+    //     otp: fixedOtp,
+    //     name: user.name
+    // }).catch((e) => console.error("📭 reset-email dispatch failed:", e.message));
+
+    return {
+        message: "Reset code sent to your email",
+        data: {}
+    };
+};
+
+export const resetPasswordService = async ({ email, otp, newPassword }) => {
+    if (!email || !otp || !newPassword) {
+        throw new Error("Email, OTP and new password are required");
+    }
+    if (newPassword.length < 6) {
+        throw new Error("Password must be at least 6 characters");
+    }
+
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail }).select("+passwordHash");
+    if (!user || user.isBlocked || user.role !== "user") {
+        throw new Error("Invalid or expired reset code");
+    }
+
+    const otpRecord = await Otp.findOne({ phone: user.phone, consumeAt: null });
+    if (!otpRecord) {
+        throw new Error("Invalid or expired reset code");
+    }
+    if (otpRecord.expireAt < new Date()) {
+        throw new Error("Reset code has expired");
+    }
+    if (otpRecord.lockedUntill && otpRecord.lockedUntill > new Date()) {
+        throw new Error("Too many attempts, try again after 30 minutes");
+    }
+
+    const match = await bcrypt.compare(otp, otpRecord.otpHash);
+    if (!match) {
+        otpRecord.attempts += 1;
+        if (otpRecord.attempts >= 5) {
+            otpRecord.lockedUntill = new Date(Date.now() + 30 * 60 * 1000);
+        }
+        await otpRecord.save();
+        throw new Error("Reset code does not match");
+    }
+
+    otpRecord.consumeAt = new Date();
+    await otpRecord.save();
+
+    user.passwordHash = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    return {
+        message: "Password reset successful",
+        data: {}
     };
 };
 

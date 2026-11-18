@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"user":{"$numberInt":"1"}},"name":"user_1"},{"v":{"$numberInt":"2"},"key":{"expiresAt":{"$numberInt":"1"}},"name":"expiresAt_1"}],"uuid":"2a5eb3f914a140fa8cd2d2f0e0f70ee9","collectionName":"shippingquotes","type":"collection"}

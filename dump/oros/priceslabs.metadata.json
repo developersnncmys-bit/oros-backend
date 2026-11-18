@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"product":{"$numberInt":"1"}},"name":"product_1"}],"uuid":"e31121686df744dc904f5c0efb560825","collectionName":"priceslabs","type":"collection"}

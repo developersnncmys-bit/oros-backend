@@ -1,4 +1,4 @@
-    import { registerService,verifyRegisterOtpService,loginService ,verifyLoginOtpService,adminLoginService,registerWithPasswordService,loginWithPasswordService} from "../services/auth.service.js";
+    import { registerService,verifyRegisterOtpService,loginService ,verifyLoginOtpService,adminLoginService,registerWithPasswordService,loginWithPasswordService,forgotPasswordService,resetPasswordService} from "../services/auth.service.js";
 
     export const register= async (req,res)=>{
         const {name , email , phone} = req.body;
@@ -53,6 +53,26 @@
     export const loginWithPassword = async (req, res) => {
         const { email, password } = req.body;
         const { data, message } = await loginWithPasswordService({ email, password });
+        res.json({
+            success: true,
+            message,
+            data
+        });
+    };
+
+    export const forgotPassword = async (req, res) => {
+        const { email } = req.body;
+        const { data, message } = await forgotPasswordService({ email });
+        res.json({
+            success: true,
+            message,
+            data
+        });
+    };
+
+    export const resetPassword = async (req, res) => {
+        const { email, otp, newPassword } = req.body;
+        const { data, message } = await resetPasswordService({ email, otp, newPassword });
         res.json({
             success: true,
             message,
